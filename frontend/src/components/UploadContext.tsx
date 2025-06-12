@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useUploadContextMutation } from "../queries/useUploadContextMutation";
 import Icon from "./Icon";
 import uploadIcon from "../assets/Icons/upload.svg";
-import { BACKEND_URL } from "../constants";
+
 const UploadContext = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {

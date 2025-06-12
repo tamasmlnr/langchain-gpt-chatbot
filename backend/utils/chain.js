@@ -1,28 +1,37 @@
-import {
-    RunnablePassthrough,
-    RunnableSequence,
-  } from "@langchain/core/runnables";
-  import { ChatOpenAI } from "@langchain/openai";
-  import { StringOutputParser } from "@langchain/core/output_parsers";
-  import { PromptTemplate } from "@langchain/core/prompts"
-  import { pipe } from "langchain/stores/pipeline";
-  
-  const openAIApiKey = process.env.OPENAI_API_KEY;
-  const openAIUrl = process.env.OPENAI_API_URL;
-  
-  const llm = new ChatOpenAI({
-    apiKey: openAIApiKey,
-    configuration: {
-        modelName: "gpt-4",
-        baseURL: openAIUrl,  
-    }
-  });
-  
-  const prompt = PromptTemplate.fromTemplate("Who is the captain of {team}")
+import { ChatOpenAI } from "@langchain/openai";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import dotenv from "dotenv";
 
-  const chain = pipe(RunnablePassthrough, prompt, llm, StringOutputParser);
-  
-  const result = await chain.invoke("Liverpool")
-  console.log(result)
-  export { chain };
-  
+dotenv.config();
+
+const model = new ChatOpenAI({
+  openAIApiKey: process.env.GROQ_API_KEY,
+  configuration: {
+    baseURL: "https://api.groq.com/openai/v1",
+  },
+  modelName: "llama3-70b-8192",
+  temperature: 0.7,
+});
+
+const prompt = ChatPromptTemplate.fromTemplate(
+  "You are a comedian. Tell a joke about {topic}."
+);
+
+const chain = prompt.pipe(model);
+
+const result = await chain.invoke({
+  topic: "dogs",
+});
+
+// const convPrompt = ChatPromptTemplate.fromMessages(
+//   ["system", "Generate a joke based on a word provided by the user."],
+//   ["human", "{input}"]
+// );
+
+// const convChain = convPrompt.pipe(model);
+
+// const convResult = await convChain.invoke({
+//   input: "cats",
+// });
+
+console.log("result", result);

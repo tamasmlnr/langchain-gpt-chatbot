@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
-
+import { invokeChain } from "./utils/ragEngine.js";
 dotenv.config();
 
 const app = express();
@@ -31,16 +31,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post("/api/context/upload", (req, res) => {
-  const { context } = req.body;
-  if (!context) {
-    return res.status(400).json({ error: "Context is required" });
-  }
-  console.log("Context received:", context);
-  res.json({ message: "Context set", context });
-});
-
-app.post("/a", upload.single("file"), (req, res) => {
+app.post("/api/context/upload", upload.single("file"), (req, res) => {
   console.log("Upload endpoint called");
 
   if (!req.file) {
@@ -62,6 +53,15 @@ app.post("/a", upload.single("file"), (req, res) => {
     console.error("Error processing file:", error);
     res.status(500).json({ error: "Error processing file" });
   }
+});
+
+app.post("/api/messages/send", async (req, res) => {
+  const ragResponse = await invokeChain(req.body.message);
+  console.log(ragResponse);
+  res.status(200).json({
+    message: ragResponse,
+    data: req.body,
+  });
 });
 
 app.listen(PORT, () => {

@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addMessage } from "../redux/messagesSlice";
+import { useSendMessageMutation } from "../queries/useSendMessageMutation";
 
 interface SimpleTextboxProps {
   placeholder?: string;
@@ -8,21 +11,29 @@ interface SimpleTextboxProps {
 
 const Textbox: React.FC<SimpleTextboxProps> = ({
   placeholder = "Enter your text here...",
-  onSubmit,
   initialValue = "",
 }) => {
   const [text, setText] = useState<string>(initialValue);
+  const dispatch = useDispatch();
+  const { mutate: sendMessageMutation, isPending } = useSendMessageMutation();
+  const isDisabled = !text.trim() || isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setText(e.target.value);
   };
 
   const handleSubmit = (): void => {
-    console.log("Submitted text:", text);
-    if (onSubmit) {
-      onSubmit(text);
+    if (!isDisabled) {
+      dispatch(
+        addMessage({
+          role: "user",
+          content: text,
+          timestamp: new Date().toISOString(),
+        })
+      );
+      sendMessageMutation(text);
+      setText("");
     }
-    setText("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -32,7 +43,7 @@ const Textbox: React.FC<SimpleTextboxProps> = ({
   };
 
   return (
-    <div style={{ margin: "10vh 0 auto" }}>
+    <div style={{ margin: "10vh 0 auto", width: "100%" }}>
       <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
         <input
           type="text"
@@ -43,6 +54,7 @@ const Textbox: React.FC<SimpleTextboxProps> = ({
           style={{
             flex: 1,
             padding: "10px",
+            width: "100%",
             fontSize: "16px",
             border: "2px solid #ddd",
             borderRadius: "4px",
@@ -52,10 +64,11 @@ const Textbox: React.FC<SimpleTextboxProps> = ({
 
         <button
           onClick={handleSubmit}
+          disabled={isDisabled}
           style={{
             padding: "10px 12px",
             fontSize: "16px",
-            backgroundColor: "#007bff",
+            backgroundColor: isDisabled ? "grey" : "#007bff",
             color: "white",
             border: "none",
             borderRadius: "4px",

@@ -10,7 +10,7 @@ const uploadContext = async (file: File) => {
   console.log("Uploading file...");
 
   try {
-    const response = await fetch(`${BACKEND_URL}/a`, {
+    const response = await fetch(`${BACKEND_URL}/context/upload`, {
       method: "POST",
       body: formData,
     });
