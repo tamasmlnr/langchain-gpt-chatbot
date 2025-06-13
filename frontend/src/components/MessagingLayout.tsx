@@ -1,15 +1,25 @@
 import { useSelector } from "react-redux";
+import { useEffect, useRef } from "react";
 import Message from "./Message";
 import Textbox from "./Textbox";
 import { selectContextIsSet } from "../redux/contextSelector";
 import UploadContext from "./UploadContext";
 import { selectMessages } from "../redux/messagesSelector";
+import { useSendMessageMutation } from "../queries/useSendMessageMutation";
 
 interface MessagingLayoutProps {}
 
 const MessagingLayout = () => {
   const isContextSet = useSelector(selectContextIsSet);
   const messages = useSelector(selectMessages);
+  const sendMessageMutation = useSendMessageMutation();
+  const { isPending } = sendMessageMutation;
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isPending]);
 
   return !isContextSet ? (
     <div
@@ -21,29 +31,47 @@ const MessagingLayout = () => {
         left: "50%",
         transform: "translate(-50%, -50%)",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        flexDirection: "column",
       }}
     >
       <div
         style={{
+          flex: 1,
+          width: "calc(50vw + 1rem)",
+          overflowY: "auto",
+          padding: "0px",
+          margin: 0,
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          gap: "8px",
         }}
       >
         {messages.map((message, index) => {
+          const isLastMessage = index === messages.length - 1;
           return (
-            <Message
-              content={message.content}
-              timestamp={message.timestamp}
-              sender={message.role}
-              key={index}
-            />
+            <div key={index} ref={isLastMessage ? messagesEndRef : null}>
+              <Message
+                content={message.content}
+                timestamp={message.timestamp}
+                sender={message.role}
+              />
+            </div>
           );
         })}
-        <Textbox />
+        {isPending && (
+          <div ref={messagesEndRef}>
+            <Message
+              content="Thinking..."
+              timestamp={new Date().toISOString()}
+              sender="assistant"
+              isLoading
+            />
+          </div>
+        )}
+      </div>
+
+      <div style={{ width: "50vw" }}>
+        <Textbox sendMessageMutation={sendMessageMutation} />
       </div>
     </div>
   ) : (

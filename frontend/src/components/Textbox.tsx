@@ -3,19 +3,20 @@ import { useDispatch } from "react-redux";
 import { addMessage } from "../redux/messagesSlice";
 import { useSendMessageMutation } from "../queries/useSendMessageMutation";
 
-interface SimpleTextboxProps {
+interface TextboxProps {
   placeholder?: string;
-  onSubmit?: (text: string) => void;
   initialValue?: string;
+  sendMessageMutation: ReturnType<typeof useSendMessageMutation>;
 }
 
-const Textbox: React.FC<SimpleTextboxProps> = ({
+const Textbox: React.FC<TextboxProps> = ({
   placeholder = "Enter your text here...",
   initialValue = "",
+  sendMessageMutation,
 }) => {
   const [text, setText] = useState<string>(initialValue);
   const dispatch = useDispatch();
-  const { mutate: sendMessageMutation, isPending } = useSendMessageMutation();
+  const { mutate: mutateMessage, isPending } = sendMessageMutation;
   const isDisabled = !text.trim() || isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -31,7 +32,7 @@ const Textbox: React.FC<SimpleTextboxProps> = ({
           timestamp: new Date().toISOString(),
         })
       );
-      sendMessageMutation(text);
+      mutateMessage(text);
       setText("");
     }
   };
@@ -69,6 +70,7 @@ const Textbox: React.FC<SimpleTextboxProps> = ({
             padding: "10px 12px",
             fontSize: "16px",
             backgroundColor: isDisabled ? "grey" : "#007bff",
+            transition: "1s",
             color: "white",
             border: "none",
             borderRadius: "4px",

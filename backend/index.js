@@ -57,7 +57,6 @@ app.post("/api/context/upload", upload.single("file"), (req, res) => {
 
 app.post("/api/messages/send", async (req, res) => {
   const ragResponse = await invokeChain(req.body.message);
-  console.log(ragResponse);
   res.status(200).json({
     message: ragResponse,
     data: req.body,
