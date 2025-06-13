@@ -14,14 +14,13 @@ const MessagingLayout = () => {
   const messages = useSelector(selectMessages);
   const sendMessageMutation = useSendMessageMutation();
   const { isPending } = sendMessageMutation;
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isPending]);
 
-  return !isContextSet ? (
+  return isContextSet ? (
     <div
       style={{
         width: "50vw",
@@ -49,7 +48,7 @@ const MessagingLayout = () => {
         {messages.map((message, index) => {
           const isLastMessage = index === messages.length - 1;
           return (
-            <div key={index} ref={isLastMessage ? messagesEndRef : null}>
+            <div key={index} ref={isLastMessage ? lastMessageRef : null}>
               <Message
                 content={message.content}
                 timestamp={message.timestamp}
@@ -59,7 +58,7 @@ const MessagingLayout = () => {
           );
         })}
         {isPending && (
-          <div ref={messagesEndRef}>
+          <div ref={lastMessageRef}>
             <Message
               content="Thinking..."
               timestamp={new Date().toISOString()}

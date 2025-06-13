@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
-import { invokeChain } from "./utils/ragEngine.js";
+import { invokeChain, setContextDocument } from "./utils/ragEngine.js";
 dotenv.config();
 
 const app = express();
@@ -30,28 +30,23 @@ const upload = multer({
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
-
-app.post("/api/context/upload", upload.single("file"), (req, res) => {
-  console.log("Upload endpoint called");
-
-  if (!req.file) {
-    return res.status(400).json({ error: "File is required" });
-  }
-
+app.post("/api/context/upload", upload.single("file"), async (req, res) => {
   try {
-    const fileContent = req.file.buffer.toString("utf8");
-    console.log("File received:", req.file.originalname);
-    console.log("File size:", req.file.size);
+    if (!req.file) {
+      return res.status(400).json({ error: "File is required" });
+    }
+
+    const splitDocs = await setContextDocument(req.file.buffer);
 
     res.json({
-      message: "File uploaded successfully",
+      message: "PDF processed and split successfully",
       filename: req.file.originalname,
-      size: req.file.size,
-      context: fileContent.substring(0, 100) + "...",
+      chunks: splitDocs.length,
+      preview: splitDocs[0]?.pageContent?.slice(0, 100) + "...",
     });
   } catch (error) {
-    console.error("Error processing file:", error);
-    res.status(500).json({ error: "Error processing file" });
+    console.error("PDF parsing error:", error);
+    res.status(500).json({ error: "Failed to process PDF" });
   }
 });
 
