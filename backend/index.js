@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import multer from "multer";
-import { invokeChain, setContextDocument } from "./utils/ragEngine.js";
+import { createVectorStore, invokeChain } from "./utils/ragEngine.js";
 dotenv.config();
 
 const app = express();
@@ -16,7 +16,6 @@ app.use(
 );
 
 const PORT = process.env.PORT || 3000;
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
 
 app.use(express.json());
 
@@ -27,16 +26,12 @@ const upload = multer({
   },
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 app.post("/api/context/upload", upload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "File is required" });
+  }
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "File is required" });
-    }
-
-    const splitDocs = await setContextDocument(req.file.buffer);
+    const splitDocs = await createVectorStore(req.file.buffer);
 
     res.json({
       message: "PDF processed and split successfully",
@@ -51,11 +46,19 @@ app.post("/api/context/upload", upload.single("file"), async (req, res) => {
 });
 
 app.post("/api/messages/send", async (req, res) => {
-  const ragResponse = await invokeChain(req.body.message);
-  res.status(200).json({
-    message: ragResponse,
-    data: req.body,
-  });
+  if (!req.body.message) {
+    return res.status(400).json({ error: "A message is required" });
+  }
+  try {
+    const ragResponse = await invokeChain(req.body.message);
+    res.status(200).json({
+      message: ragResponse,
+      data: req.body,
+    });
+  } catch (error) {
+    console.error("Error getting RAG response:", error);
+    res.status(500).json({ error: "Error getting RAG response" });
+  }
 });
 
 app.listen(PORT, () => {
