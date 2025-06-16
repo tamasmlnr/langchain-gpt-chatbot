@@ -17,6 +17,7 @@ import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
 
 dotenv.config();
+const OLLAMA_PORT = process.env.OLLAMA_PORT || 11434;
 
 let contextDocuments = [];
 let vectorStore;
@@ -41,10 +42,10 @@ export const createVectorStore = async (buffer) => {
     contextDocuments = splitDocs;
 
     console.log(`Loaded ${splitDocs.length} document chunks`);
-    
+
     const embeddings = new OllamaEmbeddings({
       model: "nomic-embed-text",
-      baseUrl: "http://localhost:11434",
+      baseUrl: `http://localhost:${OLLAMA_PORT}`,
     });
 
     const contents = splitDocs.map((doc) => doc.pageContent);
