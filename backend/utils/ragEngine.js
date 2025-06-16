@@ -8,8 +8,6 @@ import dotenv from "dotenv";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { Document } from "langchain/document";
-import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { OllamaEmbeddings } from "@langchain/ollama";
@@ -24,7 +22,6 @@ let vectorStore;
 let chain;
 let chatHistory = [];
 
-console.log("vectorStore", vectorStore);
 const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 100,
   chunkOverlap: 20,

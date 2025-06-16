@@ -7,8 +7,6 @@ import UploadContext from "./UploadContext";
 import { selectMessages } from "../redux/messagesSelector";
 import { useSendMessageMutation } from "../queries/useSendMessageMutation";
 
-interface MessagingLayoutProps {}
-
 const MessagingLayout = () => {
   const isContextSet = useSelector(selectContextIsSet);
   const messages = useSelector(selectMessages);
@@ -48,7 +46,10 @@ const MessagingLayout = () => {
         {messages.map((message, index) => {
           const isLastMessage = index === messages.length - 1;
           return (
-            <div key={index} ref={isLastMessage ? lastMessageRef : null}>
+            <div
+              key={`${message.timestamp}-${message.role}`}
+              ref={isLastMessage ? lastMessageRef : null}
+            >
               <Message
                 content={message.content}
                 timestamp={message.timestamp}

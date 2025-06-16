@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { type MessageType } from "../types/Message";
 
-const initialState = {
+const initialState: { messages: MessageType[] } = {
   messages: [
     {
       role: "assistant",

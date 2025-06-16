@@ -9,6 +9,33 @@ interface TextboxProps {
   sendMessageMutation: ReturnType<typeof useSendMessageMutation>;
 }
 
+const styles = {
+  container: { margin: "10vh 0 auto", width: "100%" },
+  inputWrapper: { display: "flex", gap: "8px", alignItems: "center" },
+  input: {
+    flex: 1,
+    padding: "10px",
+    width: "100%",
+    fontSize: "16px",
+    border: "2px solid #ddd",
+    borderRadius: "4px",
+    boxSizing: "border-box",
+  },
+  button: (disabled: boolean): React.CSSProperties => ({
+    padding: "10px 12px",
+    fontSize: "16px",
+    backgroundColor: disabled ? "grey" : "#007bff",
+    transition: "1s",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }),
+};
+
 const Textbox: React.FC<TextboxProps> = ({
   placeholder = "Enter your text here...",
   initialValue = "",
@@ -44,8 +71,14 @@ const Textbox: React.FC<TextboxProps> = ({
   };
 
   return (
-    <div style={{ margin: "10vh 0 auto", width: "100%" }}>
-      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+    <div style={styles.container}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        style={styles.inputWrapper}
+      >
         <input
           type="text"
           value={text}
@@ -64,7 +97,7 @@ const Textbox: React.FC<TextboxProps> = ({
         />
 
         <button
-          onClick={handleSubmit}
+          type="submit"
           disabled={isDisabled}
           style={{
             padding: "10px 12px",
@@ -80,11 +113,11 @@ const Textbox: React.FC<TextboxProps> = ({
             justifyContent: "center",
           }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
             <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
           </svg>
         </button>
-      </div>
+      </form>
     </div>
   );
 };

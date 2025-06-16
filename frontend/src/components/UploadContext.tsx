@@ -33,7 +33,7 @@ const UploadContext = () => {
       }}
     >
       <strong>
-        Please start by uploading a file to use as context for the chat.
+        Please start by uploading a PDF file to use as context for the chat.
       </strong>
 
       <div
